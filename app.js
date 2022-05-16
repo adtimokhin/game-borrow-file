@@ -5,6 +5,18 @@ const Response = require("./response.js");
 
 const app = express();
 
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
 // Setting up routers
 const uploadRouter = require("./routes/upload");
 const downloadRouter = require("./routes/download");
@@ -12,7 +24,7 @@ const downloadRouter = require("./routes/download");
 app.use("/upload", uploadRouter);
 app.use("/download", downloadRouter);
 
-// Deafult JSON Error handler
+// Deafult Error handler
 app.use((err, req, res, next) => {
   const code = err.statusCode || 500;
   const message = err.message;
