@@ -3,9 +3,12 @@ const bodyParser = require("body-parser"); // TODO: Пойнять как раб
 
 const Response = require("./response.js");
 
+const path = require("path");
+
 const app = express();
 
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "data", "images"))); // statically serving all files from images folder
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

@@ -9,24 +9,22 @@ const multer = require("multer");
 
 const fs = require("fs");
 const path = require("path");
+const {
+  createFolderIfDoesNotExist,
+  getNumberOfFilesInFolder,
+} = require("../utils/files/uploadFile");
 
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // generating folders to store files in appropriate locations
+    // generating folders to store files in appropriate location
     const publisherId = req.body.publisherId;
     const gameId = req.body.gameId;
 
+    const publisherFolder = path.join("data", "images", publisherId);
+    createFolderIfDoesNotExist(publisherFolder);
     const gameFolder = path.join("data", "images", publisherId, gameId);
+    createFolderIfDoesNotExist(gameFolder);
 
-    if (!fs.existsSync(gameFolder)) {
-      // Checking whether a publisher folder exist
-      const publisherFolder = path.join("data", "images", publisherId);
-      if (!fs.existsSync(publisherFolder)) {
-        // If no - we will generate it first
-        fs.mkdirSync(publisherFolder);
-      }
-      fs.mkdirSync(gameFolder);
-    }
 
     cb(null, gameFolder);
   },
@@ -35,11 +33,31 @@ const imageStorage = multer.diskStorage({
   },
 });
 
-const imagesUpload = multer({ storage: imageStorage });
+// This filter only allows images to be stored in data/images directory. Max of 10 per game
+const imageFilter = (req, file, cb) => {
+  // We want to store only image files
+  if (
+    !(
+      file.mimetype === "image/png" ||
+      file.mimetype === "image/jpg" ||
+      file.mimetype === "image/jpeg"
+    )
+  ) {
+    cb(null, false); // We do not want to accept this file
+  } else {
+    // TODO: add a limit to how many images can be associated with a single gameId
+    cb(null, true); // We want to accept this file
+  }
+};
 
-// Max of 5 images can be send per request
+const imagesUpload = multer({ storage: imageStorage, fileFilter: imageFilter });
+
+// Max of 10 images can be send per request
 // Will return a list of URIs to find the images
-// TODO: stop the program from automatically adding files to the folders. Add some kind of verifiaction
-router.post("/images", imagesUpload.array("images", 5), controller.uploadImage);
+router.post(
+  "/images",
+  imagesUpload.array("images", 10),
+  controller.uploadImage
+);
 
 module.exports = router;

@@ -572,6 +572,7 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/node,visualstudio,macos
 
-# exclude everything from data folder - it stores files that will be shared with users
+# exclude everything from data folderы - it stores files that will be shared with users
+# The folders themselves must remain for correct opperatio of file saving oppeartions.
 data/images/*
 !data/images/.gitkeep
